@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Better Rhodes — Build Your Own Better</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:ital,opsz,wght@0,12..96,400;0,12..96,500;0,12..96,600;0,12..96,700;0,12..96,800;1,12..96,500;1,12..96,600&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF5EC;
+    --white:#FFFFFF;
+    --ink:#1A150E;
+    --ink-soft:#6E6656;
+    --line:rgba(26,21,14,.14);
+    --rind:#ED6A21;
+    --rind-deep:#B8460F;
+    --rind-tint:#FBE0C8;
+    --plum:#5C2438;
+    --plum-soft:#7A3550;
+    --good:#3A6B4A;
+    --bad:#B5402A;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Archivo',sans-serif; color:var(--ink); background:var(--paper); line-height:1.5; -webkit-font-smoothing:antialiased; overflow-x:hidden;}
+  @media (prefers-reduced-motion: reduce){ *{animation-duration:.01ms !important; transition-duration:.01ms !important; scroll-behavior:auto !important;} }
+  h1,h2,h3{font-family:'Bricolage Grotesque',sans-serif; font-weight:700; letter-spacing:-0.02em; color:var(--ink);}
+  em{font-style:italic; font-family:'Bricolage Grotesque',sans-serif; font-weight:600;}
+  a{color:inherit; text-decoration:none;}
+  button{font-family:inherit; cursor:pointer; background:none; border:none;}
+  input{font-family:inherit;}
+  ::selection{background:var(--rind); color:#fff;}
+  :focus-visible{outline:2px solid var(--rind); outline-offset:3px;}
+  .wrap{max-width:1320px; margin:0 auto; padding:0 40px;}
+  img,svg{display:block;}
+  .reveal{opacity:0; transform:translateY(20px); transition:opacity .7s ease, transform .7s ease;}
+  .reveal.in{opacity:1; transform:translateY(0);}
+  @media(max-width:900px){ .wrap{padding:0 22px;} }
+
+  /* ============ BUTTONS ============ */
+  .btn{display:inline-flex; align-items:center; gap:10px; padding:16px 30px; border-radius:3px; font-family:'Archivo',sans-serif; font-size:13px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; transition:.2s;}
+  .btn-fill{background:var(--ink); color:var(--paper);}
+  .btn-fill:hover{background:var(--rind); color:#fff;}
+  .btn-rind{background:var(--rind); color:#fff;}
+  .btn-rind:hover{background:var(--ink);}
+  .btn-outline{border:1.5px solid currentColor;}
+  .btn-outline.on-dark{color:#fff;}
+  .btn-outline.on-dark:hover{background:#fff; color:var(--ink);}
+  .btn-outline.on-light{color:var(--ink);}
+  .btn-outline.on-light:hover{background:var(--ink); color:#fff;}
+  .btn-sm{padding:11px 20px; font-size:11.5px;}
+  .btn:disabled{opacity:.4; cursor:not-allowed;}
+  .text-link{font-size:14px; font-weight:600; border-bottom:1.5px solid currentColor; padding-bottom:2px;}
+  .text-link:hover{color:var(--rind); border-color:var(--rind);}
+
+  /* ============ TICKER ============ */
+  .ticker{background:var(--ink); color:var(--paper); overflow:hidden; white-space:nowrap; padding:10px 0;}
+  .ticker-track{display:inline-block; animation:scroll-left 28s linear infinite;}
+  .ticker-track span{display:inline-block; padding:0 28px; font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;}
+  .ticker-track span b{color:var(--rind);}
+  @keyframes scroll-left{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+
+  /* ============ HEADER ============ */
+  header{position:sticky; top:0; z-index:100; background:transparent; transition:background .3s, border-color .3s;}
+  header.scrolled{background:rgba(250,245,236,.94); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);}
+  .nav-row{display:flex; align-items:center; justify-content:space-between; padding:22px 0;}
+  .brand{font-family:'Bricolage Grotesque',sans-serif; font-size:20px; font-weight:700;}
+  .brand span{color:var(--rind);}
+  .nav-links{display:flex; gap:34px; font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:.03em;}
+  .nav-links a{position:relative; padding-bottom:3px;}
+  .nav-links a::after{content:''; position:absolute; left:0; right:100%; bottom:0; height:1.5px; background:var(--rind); transition:right .25s ease;}
+  .nav-links a:hover::after{right:0;}
+  .nav-right{display:flex; align-items:center; gap:22px;}
+  .icon-btn{width:20px; height:20px;}
+  .burger{display:none; flex-direction:column; gap:5px; width:26px;}
+  .burger span{height:2px; background:var(--ink); width:100%; transition:.25s;}
+  @media(max-width:860px){ .nav-links{display:none;} .burger{display:flex;} }
+
+  .mobile-menu{position:fixed; inset:0; background:var(--ink); z-index:150; display:flex; flex-direction:column; padding:24px 28px; transform:translateY(-100%); transition:transform .35s cubic-bezier(.2,.8,.3,1);}
+  .mobile-menu.open{transform:translateY(0);}
+  .mobile-menu-head{display:flex; justify-content:space-between; align-items:center;}
+  .mobile-menu .brand{color:#fff;}
+  .mobile-close{color:#fff; font-size:28px;}
+  .mobile-links{margin-top:60px; display:flex; flex-direction:column; gap:6px;}
+  .mobile-links a{font-family:'Bricolage Grotesque',sans-serif; font-size:34px; font-weight:600; color:#fff; padding:12px 0; border-bottom:1px solid rgba(255,255,255,.15);}
+
+  /* ============ HERO ============ */
+  .hero{position:relative; padding:64px 0 0; overflow:hidden;}
+  .hero-inner{position:relative; min-height:78vh; display:flex; flex-direction:column; justify-content:center;}
+  .hero-spine{position:absolute; left:0; top:0; bottom:0; display:flex; align-items:center;}
+  .hero-spine span{writing-mode:vertical-rl; transform:rotate(180deg); font-size:11.5px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft); white-space:nowrap;}
+  .pour-shape{position:absolute; right:-8%; top:-6%; width:56%; max-width:640px; opacity:.95; z-index:0;}
+  .hero-content{position:relative; z-index:2; padding-left:56px; max-width:900px;}
+  .hero-badge{display:inline-flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--rind-deep); margin-bottom:28px;}
+  .hero-badge::before{content:''; width:7px; height:7px; border-radius:50%; background:var(--rind);}
+  .hero h1{font-size:clamp(52px,8.6vw,128px); line-height:.92; letter-spacing:-0.03em;}
+  .hero h1 .line2{display:block; margin-top:-.06em;}
+  .hero h1 em{color:var(--rind); position:relative; margin-left:.15em;}
+  .hero-lead{font-size:18px; color:var(--ink-soft); max-width:440px; margin:34px 0 0; line-height:1.6;}
+  .hero-cta-row{display:flex; align-items:center; gap:28px; margin-top:38px; flex-wrap:wrap;}
+  @media(max-width:760px){
+    .hero-spine{display:none;}
+    .hero-content{padding-left:0;}
+    .pour-shape{width:82%; right:-20%; top:-2%; opacity:.5;}
+  }
+
+  /* ============ VALUE STATEMENT ============ */
+  .value{padding:96px 0; border-top:1px solid var(--line);}
+  .value-grid{display:grid; grid-template-columns:1.6fr .9fr; gap:60px; align-items:end;}
+  .value h2{font-size:clamp(28px,3.4vw,44px); line-height:1.15; font-weight:600;}
+  .value-side{border-left:1.5px solid var(--ink); padding-left:28px;}
+  .value-num{font-size:56px; font-weight:700; line-height:1;}
+  .value-side p{font-size:13.5px; color:var(--ink-soft); margin-top:10px; max-width:220px;}
+  @media(max-width:860px){ .value-grid{grid-template-columns:1fr; gap:36px;} .value-side{border-left:none; border-top:1.5px solid var(--ink); padding-left:0; padding-top:20px;} }
+
+  /* ============ WAYS IN — editorial index ============ */
+  .ways{border-top:1px solid var(--ink);}
+  .way-row{display:grid; grid-template-columns:80px 1fr auto; align-items:center; gap:28px; padding:36px 0; border-bottom:1px solid var(--line); position:relative; overflow:hidden;}
+  .way-row::before{content:''; position:absolute; inset:0; background:var(--rind); transform:translateX(-101%); transition:transform .35s cubic-bezier(.3,.7,.3,1); z-index:0;}
+  .way-row:hover::before{transform:translateX(0);}
+  .way-row > *{position:relative; z-index:1;}
+  .way-num{font-family:'Bricolage Grotesque',sans-serif; font-size:15px; font-weight:600; color:var(--ink-soft); transition:color .3s;}
+  .way-row:hover .way-num{color:#fff;}
+  .way-title-wrap h3{font-size:clamp(24px,3.4vw,42px); font-weight:600; transition:color .3s;}
+  .way-row:hover .way-title-wrap h3{color:#fff;}
+  .way-desc{font-size:13.5px; color:var(--ink-soft); margin-top:6px; max-width:360px; transition:color .3s;}
+  .way-row:hover .way-desc{color:rgba(255,255,255,.85);}
+  .way-arrow{width:44px; height:44px; border-radius:50%; border:1.5px solid var(--ink); display:flex; align-items:center; justify-content:center; transition:.3s; flex-shrink:0;}
+  .way-row:hover .way-arrow{border-color:#fff; background:#fff; transform:rotate(45deg);}
+  .way-row:hover .way-arrow svg{stroke:var(--ink);}
+  .way-arrow svg{transition:stroke .3s;}
+  @media(max-width:700px){ .way-row{grid-template-columns:44px 1fr; row-gap:14px;} .way-arrow{display:none;} }
+
+  /* ============ BUILDER MODULE (tabbed) ============ */
+  .builder-section{padding:96px 0; background:var(--white); border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+  .builder-head{display:grid; grid-template-columns:auto 1fr; gap:40px; align-items:baseline; margin-bottom:44px;}
+  .builder-head .bignum{font-family:'Bricolage Grotesque',sans-serif; font-size:clamp(64px,8vw,120px); font-weight:700; line-height:.85; color:var(--rind-tint);}
+  .builder-head h2{font-size:clamp(26px,3vw,38px);}
+  .tab-row{display:flex; gap:0; border-bottom:1.5px solid var(--ink); margin-bottom:40px; overflow-x:auto;}
+  .tab-btn{padding:16px 26px 14px; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:var(--ink-soft); border-bottom:3px solid transparent; margin-bottom:-1.5px; white-space:nowrap; display:flex; align-items:center; gap:8px;}
+  .tab-btn .tnum{font-size:10.5px; opacity:.6;}
+  .tab-btn.active{color:var(--ink); border-color:var(--rind);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+  .flow-grid{display:grid; grid-template-columns:.85fr 1.15fr; gap:56px; align-items:start;}
+  .flow-side{position:sticky; top:110px;}
+  .flow-side .fnum{font-family:'Bricolage Grotesque',sans-serif; font-size:80px; font-weight:700; color:var(--rind-tint); line-height:.8;}
+  .flow-side h3{font-size:24px; margin-top:12px;}
+  .flow-side p{font-size:13.5px; color:var(--ink-soft); margin-top:12px; max-width:280px;}
+  @media(max-width:900px){ .flow-grid{grid-template-columns:1fr;} .flow-side{position:static;} }
+
+  /* editorial option rows — no radio dots, highlighter treatment */
+  .opt-row{display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 4px; border-bottom:1px solid var(--line); border-left:3px solid transparent; padding-left:16px; transition:.2s; text-align:left; width:100%;}
+  .opt-row:hover{border-left-color:var(--line);}
+  .opt-row.sel{border-left-color:var(--rind); background:var(--rind-tint);}
+  .opt-row .otitle{font-weight:500; font-size:15px;}
+  .opt-row.sel .otitle{font-weight:700;}
+  .opt-row .odesc{font-size:12.5px; color:var(--ink-soft); margin-top:2px;}
+
+  .field-label{font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); margin:26px 0 12px;}
+  .field-label:first-child{margin-top:0;}
+  .tab-choice-row{display:flex; gap:22px; flex-wrap:wrap;}
+  .tab-choice{font-size:14.5px; font-weight:500; color:var(--ink-soft); padding-bottom:4px; border-bottom:2px solid transparent;}
+  .tab-choice.sel{color:var(--ink); font-weight:700; border-color:var(--rind);}
+  .tab-choice:hover{color:var(--ink);}
+
+  /* shared product rows (results of any flow) */
+  .plist{border-top:1.5px solid var(--ink); margin-top:24px;}
+  .plist-meta{padding:14px 4px; font-size:12.5px; color:var(--ink-soft); border-bottom:1px solid var(--line); display:flex; align-items:center; gap:8px;}
+  .plist-meta .dot{width:16px; height:16px; border-radius:50%; background:var(--line); color:#fff; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700;}
+  .plist-meta .dot.on{background:var(--good);}
+  .prow{display:flex; align-items:center; gap:14px; padding:16px 4px; border-bottom:1px solid var(--line); transition:.2s;}
+  .prow.removed{opacity:0; max-height:0; padding:0; overflow:hidden; border:none;}
+  .prow .pswatch{width:34px; flex-shrink:0;}
+  .prow .pinfo{flex:1; min-width:0;}
+  .prow .pinfo .pname{font-weight:600; font-size:14.5px;}
+  .prow .pinfo .pdesc{font-size:12px; color:var(--ink-soft); margin-top:2px;}
+  .qty{display:flex; align-items:center; gap:10px; flex-shrink:0;}
+  .qty button{width:22px; height:22px; font-size:15px; font-weight:700; border:1px solid var(--line); border-radius:50%;}
+  .qty button:hover{border-color:var(--ink);}
+  .qty span{width:16px; text-align:center; font-size:13px; font-weight:700;}
+  .pprice{font-weight:700; font-size:14px; width:60px; text-align:right; flex-shrink:0;}
+  .picon{width:30px; height:30px; flex-shrink:0; display:flex; align-items:center; justify-content:center; opacity:.6;}
+  .picon:hover{opacity:1;}
+  .pactions{display:flex; gap:8px; flex-shrink:0;}
+  .swapbox{padding:4px 4px 14px 48px; display:none;}
+  .swapbox.open{display:block;}
+  .swap-opt{display:flex; justify-content:space-between; align-items:center; padding:9px 12px; border:1px solid var(--line); border-radius:4px; margin-top:6px; font-size:12.5px; background:var(--paper);}
+  .swap-opt button{font-weight:700; color:var(--rind); font-size:11px; text-transform:uppercase;}
+  .undo-toast{display:flex; justify-content:space-between; align-items:center; background:var(--ink); color:#fff; padding:10px 16px; font-size:12.5px; margin-top:4px;}
+  .undo-toast button{color:var(--rind); font-weight:700; text-transform:uppercase; font-size:11px;}
+  .plist-footer{padding:20px 4px 0;}
+  .plist-footer .btn{width:100%; justify-content:center;}
+  .refresh-note{display:none; align-items:center; justify-content:space-between; gap:12px; background:var(--rind-tint); border-radius:4px; padding:12px 16px; margin:18px 0; font-size:13px;}
+  .refresh-note.show{display:flex;}
+  .refresh-note button{font-weight:700; text-transform:uppercase; font-size:11px; background:var(--rind); color:#fff; padding:7px 14px; border-radius:3px;}
+  .home-note{font-size:12.5px; color:var(--ink-soft); margin-top:16px;}
+
+  /* recipe rows */
+  .rf-row{border-bottom:1px solid var(--line);}
+  .rf-head{display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 4px; cursor:pointer;}
+  .rf-head h4{font-size:16px;}
+  .rf-meta-row{display:flex; gap:12px; flex-wrap:wrap; margin-top:4px;}
+  .rf-meta{font-size:11.5px; color:var(--ink-soft); font-weight:600;}
+  .rf-chevron{transition:.25s; flex-shrink:0;}
+  .rf-row.open .rf-chevron{transform:rotate(180deg);}
+  .rf-detail{max-height:0; overflow:hidden; transition:max-height .4s cubic-bezier(.2,.7,.3,1);}
+  .rf-row.open .rf-detail{max-height:900px;}
+  .rf-detail-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:28px; padding:0 4px 22px;}
+  .rf-method ol{padding-left:18px; font-size:13.5px; color:var(--ink-soft); line-height:1.8;}
+  .rf-kitchen{font-size:12.5px; color:var(--ink-soft); margin-top:10px;}
+  @media(max-width:700px){ .rf-detail-grid{grid-template-columns:1fr;} }
+
+  /* bench filmstrip */
+  .bench-filter{display:flex; gap:22px; margin-bottom:22px; flex-wrap:wrap;}
+  .bench-strip{display:flex; gap:0; overflow-x:auto; margin:0 -4px;}
+  .bench-tile{min-width:190px; flex-shrink:0; padding:20px 18px; border-right:1px solid var(--line);}
+  .bench-swatch{height:80px; display:flex; align-items:center; justify-content:center; margin-bottom:14px;}
+  .bench-tile h5{font-size:12.5px; font-weight:600; line-height:1.35; min-height:32px;}
+  .bench-row{display:flex; justify-content:space-between; align-items:center; margin-top:10px;}
+  .bench-price{font-weight:700; font-size:13px;}
+  .bench-add{width:26px; height:26px; border-radius:50%; border:1.5px solid var(--ink); font-size:15px;}
+  .bench-add:hover{background:var(--ink); color:#fff;}
+  .bench-add.added{background:var(--good); border-color:var(--good); color:#fff;}
+
+  /* ============ CURATED — color block, featured + list ============ */
+  .curated{background:var(--plum); color:#F3E8EC; padding:96px 0;}
+  .curated .section-eyebrow{color:#E7A9BD;}
+  .curated h2{color:#fff;}
+  .curated-grid{display:grid; grid-template-columns:1.4fr 1fr; gap:48px; margin-top:48px;}
+  .featured-box{border-top:1.5px solid rgba(255,255,255,.3); padding-top:24px;}
+  .featured-tag{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--rind);}
+  .featured-box h3{color:#fff; font-size:clamp(28px,3.2vw,42px); margin:12px 0 16px;}
+  .featured-box p{color:#D9B9C4; font-size:14.5px; max-width:440px; margin-bottom:24px;}
+  .featured-items{margin-bottom:24px;}
+  .featured-items li{list-style:none; display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px dotted rgba(255,255,255,.2); font-size:13.5px; color:#E9D3D9;}
+  .box-list{border-top:1.5px solid rgba(255,255,255,.3);}
+  .box-list-row{display:flex; justify-content:space-between; align-items:center; padding:20px 0; border-bottom:1px solid rgba(255,255,255,.15); gap:16px;}
+  .box-list-row .btitle{color:#fff; font-weight:600; font-size:16px;}
+  .box-list-row .btag{font-size:11px; color:#E7A9BD; text-transform:uppercase; letter-spacing:.03em; margin-top:4px;}
+  .box-list-row .bprice{font-weight:700; color:#fff; font-family:'Bricolage Grotesque',sans-serif; flex-shrink:0;}
+  @media(max-width:900px){ .curated-grid{grid-template-columns:1fr;} }
+
+  /* ============ SOCIAL PROOF ============ */
+  .proof{padding:96px 0;}
+  .proof-quote{font-family:'Bricolage Grotesque',sans-serif; font-size:clamp(26px,3.6vw,46px); font-weight:500; line-height:1.25; max-width:920px;}
+  .proof-quote em{color:var(--rind);}
+  .proof-attr{margin-top:20px; font-size:13.5px; color:var(--ink-soft); font-weight:600;}
+  .proof-stats{display:flex; gap:0; margin-top:64px; border-top:1.5px solid var(--ink);}
+  .proof-stat{flex:1; padding:28px 24px 0; border-right:1px solid var(--line);}
+  .proof-stat:last-child{border-right:none;}
+  .proof-stat .snum{font-family:'Bricolage Grotesque',sans-serif; font-size:clamp(32px,4vw,52px); font-weight:700;}
+  .proof-stat .slabel{font-size:12px; color:var(--ink-soft); margin-top:6px; text-transform:uppercase; letter-spacing:.03em;}
+  @media(max-width:760px){ .proof-stats{flex-direction:column;} .proof-stat{border-right:none; border-bottom:1px solid var(--line); padding-bottom:20px;} }
+
+  /* ============ STORY ============ */
+  .story{background:var(--ink); color:#EDE7DA; padding:96px 0;}
+  .story-grid{display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center;}
+  .story .kicker{color:var(--rind); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:18px;}
+  .story h2{color:#fff; font-size:clamp(28px,3.2vw,40px); margin-bottom:20px; line-height:1.15;}
+  .story p{color:#B5AD98; font-size:15px; line-height:1.7; margin-bottom:16px;}
+  @media(max-width:900px){ .story-grid{grid-template-columns:1fr; gap:28px;} }
+
+  /* ============ FAQ ============ */
+  .faq{padding:96px 0;}
+  .faq-row{border-top:1px solid var(--line);}
+  .faq-row:last-child{border-bottom:1px solid var(--line);}
+  .faq-row summary{list-style:none; display:flex; justify-content:space-between; align-items:center; padding:26px 4px; cursor:pointer; font-size:18px; font-weight:600; font-family:'Bricolage Grotesque',sans-serif;}
+  .faq-row summary::-webkit-details-marker{display:none;}
+  .faq-row summary::after{content:'+'; font-size:26px; font-weight:400; color:var(--rind); flex-shrink:0; margin-left:20px;}
+  .faq-row[open] summary::after{content:'\2212';}
+  .faq-row p{padding:0 4px 26px; color:var(--ink-soft); font-size:14.5px; max-width:600px; line-height:1.6;}
+
+  /* ============ FINAL CTA — poster ============ */
+  .final-cta{background:var(--rind); color:#fff; padding:110px 0; text-align:left; position:relative; overflow:hidden;}
+  .final-cta h2{color:#fff; font-size:clamp(40px,7vw,92px); line-height:.95; max-width:900px;}
+  .final-cta p{color:#FFE0C6; font-size:16px; margin:26px 0 34px; max-width:420px;}
+
+  /* ============ FOOTER ============ */
+  footer{padding:56px 0 36px; background:var(--paper); border-top:1px solid var(--line);}
+  .foot-grid{display:grid; grid-template-columns:1.6fr 1fr 1fr 1fr 1fr; gap:24px;}
+  .foot-grid h5{font-size:11px; text-transform:uppercase; letter-spacing:.05em; margin-bottom:16px; color:var(--ink-soft); font-weight:700;}
+  .foot-grid a{display:block; font-size:13px; margin-bottom:10px;}
+  .foot-grid a:hover{color:var(--rind);}
+  .copyright{margin-top:40px; padding-top:20px; border-top:1px solid var(--line); font-size:11.5px; color:var(--ink-soft);}
+  @media(max-width:900px){ .foot-grid{grid-template-columns:repeat(2,1fr); gap:28px;} }
+
+  /* ============ CART DRAWER ============ */
+  .cart-tab{position:fixed; top:50%; right:0; transform:translateY(-50%); background:var(--ink); color:#fff; padding:16px 14px; border-radius:4px 0 0 4px; z-index:90; font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; writing-mode:vertical-rl; display:flex; align-items:center; gap:10px; box-shadow:-4px 0 16px rgba(0,0,0,.15);}
+  .cart-tab:hover{background:var(--rind);}
+  .cart-tab .badge{writing-mode:horizontal-tb; background:var(--rind); color:#fff; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px;}
+  .cart-overlay{position:fixed; inset:0; background:rgba(20,20,20,.5); z-index:95; display:none;}
+  .cart-overlay.open{display:block;}
+  .cart-drawer{position:fixed; top:0; right:0; bottom:0; width:400px; max-width:92vw; background:var(--paper); z-index:96; transform:translateX(100%); transition:transform .3s cubic-bezier(.2,.7,.3,1); display:flex; flex-direction:column;}
+  .cart-drawer.open{transform:translateX(0);}
+  .cart-head{display:flex; justify-content:space-between; align-items:center; padding:24px; border-bottom:1.5px solid var(--ink);}
+  .cart-head h3{font-size:20px;}
+  .cart-close{width:32px; height:32px; border-radius:50%; border:1px solid var(--line); display:flex; align-items:center; justify-content:center;}
+  .cart-body{flex:1; overflow-y:auto; padding:8px 24px;}
+  .cart-empty{padding:60px 0; text-align:center; color:var(--ink-soft); font-size:14px;}
+  .cart-foot{padding:20px 24px 26px; border-top:1px solid var(--line);}
+  .cart-subtotal{display:flex; justify-content:space-between; font-weight:700; font-size:17px; margin-bottom:16px; font-family:'Bricolage Grotesque',sans-serif;}
+  .cart-btn-row{display:flex; gap:10px;}
+  .cart-btn-row .btn{flex:1; justify-content:center;}
+  .cart-foot-note{font-size:11.5px; color:var(--ink-soft); text-align:center; margin-top:14px;}
+
+  /* ============ ASK BETTY ============ */
+  .betty-bubble{position:fixed; bottom:22px; left:22px; background:var(--ink); color:#fff; border-radius:100px; padding:12px 20px 12px 12px; display:flex; align-items:center; gap:10px; box-shadow:0 8px 24px rgba(0,0,0,.2); z-index:90;}
+  .betty-avatar{width:30px; height:30px; border-radius:50%; background:var(--rind); color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:13px;}
+  .betty-bubble .bt{font-size:12.5px; font-weight:700;}
+  .betty-bubble .bs{font-size:10px; color:#B5AD98;}
+  .betty-panel{position:fixed; bottom:78px; left:22px; width:300px; max-width:88vw; background:var(--paper); border:1px solid var(--line); border-radius:8px; box-shadow:0 20px 48px rgba(0,0,0,.18); z-index:91; display:none;}
+  .betty-panel.open{display:block;}
+  .betty-panel-head{padding:14px 16px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px;}
+  .betty-panel-body{padding:14px 16px; font-size:12.5px; color:var(--ink-soft); line-height:1.5;}
+  .betty-reply{margin:0 16px 12px; background:var(--white); border-radius:6px; padding:10px 12px; font-size:12px; display:none;}
+  .betty-reply.show{display:block;}
+  .betty-input-row{display:flex; gap:8px; padding:0 16px 14px;}
+  .betty-input-row input{flex:1; border:1px solid var(--line); border-radius:100px; padding:8px 12px; font-size:12px;}
+  .betty-input-row button{background:var(--ink); color:#fff; width:30px; height:30px; border-radius:50%; flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<div class="ticker"><div class="ticker-track">
+  <span>FREE US SHIPPING OVER $125</span><span><b>10% OFF</b> WHEN YOU BUILD A BUNDLE</span><span>200+ NON-ALCOHOLIC LABELS</span><span>ZERO ALCOHOL, REAL FLAVOR</span>
+  <span>FREE US SHIPPING OVER $125</span><span><b>10% OFF</b> WHEN YOU BUILD A BUNDLE</span><span>200+ NON-ALCOHOLIC LABELS</span><span>ZERO ALCOHOL, REAL FLAVOR</span>
+</div></div>
+
+<header id="siteHeader">
+  <div class="wrap nav-row">
+    <div class="brand">Better <span>Rhodes</span></div>
+    <nav class="nav-links">
+      <a href="#builder">Build a Bundle</a><a href="#boxes">Curated Boxes</a><a href="#">Wine</a><a href="#">Beer</a><a href="#">Spirits</a>
+    </nav>
+    <div class="nav-right">
+      <svg class="icon-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg class="icon-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <button class="burger" onclick="mobileMenuOpen()"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-head"><div class="brand">Better <span>Rhodes</span></div><button class="mobile-close" onclick="mobileMenuClose()">✕</button></div>
+  <div class="mobile-links">
+    <a href="#builder" onclick="mobileMenuClose()">Build a Bundle</a>
+    <a href="#boxes" onclick="mobileMenuClose()">Curated Boxes</a>
+    <a href="#" onclick="mobileMenuClose()">Wine</a>
+    <a href="#" onclick="mobileMenuClose()">Beer</a>
+    <a href="#" onclick="mobileMenuClose()">Spirits</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <svg class="pour-shape" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+    <path fill="#ED6A21" d="M420,80 C480,150 470,260 400,330 C330,400 210,420 130,360 C50,300 40,180 110,110 C180,40 360,10 420,80 Z"/>
+    <path fill="#5C2438" opacity=".18" d="M380,60 C440,130 430,240 360,310 C300,370 190,390 120,340 C60,290 50,170 120,100 C190,30 320,-10 380,60 Z"/>
+  </svg>
+  <div class="wrap">
+    <div class="hero-inner">
+      <div class="hero-spine"><span>Better Rhodes Market — Bundle Builder — Est. Zero Proof</span></div>
+      <div class="hero-content">
+        <div class="hero-badge reveal">10% off when you build a bundle</div>
+        <h1 class="reveal">Build your own<span class="line2"><em>better.</em></span></h1>
+        <p class="hero-lead reveal">Choose a moment, a few drinks, or the ingredients already on your counter. We'll help you pack a box, and pour something worth the glass.</p>
+        <div class="hero-cta-row reveal">
+          <a href="#builder" class="btn btn-fill">Start building</a>
+          <a href="#boxes" class="text-link">Browse curated boxes →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VALUE STATEMENT -->
+<section class="value">
+  <div class="wrap value-grid reveal">
+    <h2>Every box is built from individual products — nothing is a fixed bundle. Swap a bottle, change a quantity, or start over. It's your glass either way.</h2>
+    <div class="value-side">
+      <div class="value-num">10%</div>
+      <p>Off automatically when you check out with two or more products from this page.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WAYS IN -->
+<section class="ways">
+  <div class="wrap">
+    <a href="#builder" class="way-row reveal" onclick="switchTab('build')">
+      <span class="way-num">01</span>
+      <span class="way-title-wrap"><h3>Build my box</h3><span class="way-desc">Choose drinks for the moment — dinner, hosting, a gift, or just because.</span></span>
+      <span class="way-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A150E" stroke-width="2"><line x1="5" y1="19" x2="19" y2="5"/><polyline points="9 5 19 5 19 15"/></svg></span>
+    </a>
+    <a href="#builder" class="way-row reveal" onclick="switchTab('recipe')">
+      <span class="way-num">02</span>
+      <span class="way-title-wrap"><h3>Find a recipe</h3><span class="way-desc">Start with what's already in your kitchen — we only add the drinks.</span></span>
+      <span class="way-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A150E" stroke-width="2"><line x1="5" y1="19" x2="19" y2="5"/><polyline points="9 5 19 5 19 15"/></svg></span>
+    </a>
+    <a href="#builder" class="way-row reveal" onclick="switchTab('guests')">
+      <span class="way-num">03</span>
+      <span class="way-title-wrap"><h3>Plan for guests</h3><span class="way-desc">Tell us headcount and length of gathering, get a ready-to-edit mix.</span></span>
+      <span class="way-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A150E" stroke-width="2"><line x1="5" y1="19" x2="19" y2="5"/><polyline points="9 5 19 5 19 15"/></svg></span>
+    </a>
+    <a href="#builder" class="way-row reveal" onclick="switchTab('bench')">
+      <span class="way-num">04</span>
+      <span class="way-title-wrap"><h3>Pick it yourself</h3><span class="way-desc">Already know what you want? Browse the whole bench.</span></span>
+      <span class="way-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A150E" stroke-width="2"><line x1="5" y1="19" x2="19" y2="5"/><polyline points="9 5 19 5 19 15"/></svg></span>
+    </a>
+  </div>
+</section>
+
+<!-- BUILDER MODULE (tabbed) -->
+<section class="builder-section" id="builder">
+  <div class="wrap">
+    <div class="builder-head reveal">
+      <div class="bignum">B/R</div>
+      <div><h2>Your box, your way</h2><p style="color:var(--ink-soft); font-size:14.5px; margin-top:8px;">Four starting points. Every one of them lands in the same box.</p></div>
+    </div>
+
+    <div class="tab-row reveal">
+      <button class="tab-btn active" data-tab="build" onclick="switchTab('build')"><span class="tnum">01</span> Build my box</button>
+      <button class="tab-btn" data-tab="recipe" onclick="switchTab('recipe')"><span class="tnum">02</span> Find a recipe</button>
+      <button class="tab-btn" data-tab="guests" onclick="switchTab('guests')"><span class="tnum">03</span> Plan for guests</button>
+      <button class="tab-btn" data-tab="bench" onclick="switchTab('bench')"><span class="tnum">04</span> Pick it yourself</button>
+    </div>
+
+    <!-- BUILD MY BOX -->
+    <div class="tab-panel active" id="panel-build">
+      <div class="flow-grid">
+        <div class="flow-side">
+          <div class="fnum" id="bbFnum">01</div>
+          <h3 id="bbFtitle">The moment</h3>
+          <p id="bbFdesc">Pick what this box is for. Everything can still be changed once you see it.</p>
+        </div>
+        <div>
+          <div id="bbStage1">
+            <div id="bbMomentGrid"></div>
+          </div>
+          <div id="bbStage2" style="display:none;">
+            <div class="field-label">What sounds good?</div>
+            <div class="tab-choice-row" id="bbShapeChips"></div>
+            <div class="field-label">How adventurous should we be?</div>
+            <div class="tab-choice-row" id="bbAdventureSeg"></div>
+            <div style="margin-top:28px;"><button class="btn btn-rind" id="bbContinueBtn" disabled onclick="bbRevealResults()">See my box</button></div>
+          </div>
+          <div id="bbStage3" style="display:none;">
+            <div class="plist">
+              <div class="plist-meta"><span class="dot" id="bbDmDot">2</span><span id="bbDmText"></span></div>
+              <div id="bbItemList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FIND A RECIPE -->
+    <div class="tab-panel" id="panel-recipe">
+      <div class="flow-grid">
+        <div class="flow-side">
+          <div class="fnum">02</div>
+          <h3>What do you have?</h3>
+          <p>Tap what's already in your kitchen. Every recipe keeps the grocery list short — we add only the drinks.</p>
+        </div>
+        <div>
+          <div class="tab-choice-row" id="rfChips" style="margin-bottom:8px;"></div>
+          <p style="font-size:13px; color:var(--ink-soft); margin:16px 0;" id="rfNote"></p>
+          <div id="rfList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLAN FOR GUESTS -->
+    <div class="tab-panel" id="panel-guests">
+      <div class="flow-grid">
+        <div class="flow-side">
+          <div class="fnum">03</div>
+          <h3>What are you planning?</h3>
+          <p>Quantities with the assumptions shown, never a prescription. Edit everything after it's in the cart.</p>
+        </div>
+        <div>
+          <div class="field-label" style="margin-top:0;">Occasion</div>
+          <div class="tab-choice-row" id="gpOccasionChips"></div>
+          <div class="field-label">How long</div>
+          <div class="tab-choice-row" id="gpDurationSeg"></div>
+          <div class="field-label">Guests</div>
+          <div class="qty" style="width:fit-content; gap:16px;"><button onclick="gpChangeGuests(-1)" style="width:30px;height:30px;">−</button><span style="font-size:19px; width:24px;" id="gpGuestCount">6</span><button onclick="gpChangeGuests(1)" style="width:30px;height:30px;">+</button></div>
+          <div class="field-label">Will alcohol also be served?</div>
+          <div class="tab-choice-row" id="gpAlcoholSeg"></div>
+          <div style="margin-top:28px;"><button class="btn btn-rind" onclick="gpSuggestPlan()">Suggest a table plan</button></div>
+
+          <div id="gpResults" style="display:none;">
+            <div class="refresh-note" id="gpRefreshBanner"><span>Your answers changed — refresh to update quantities.</span><button onclick="gpSuggestPlan()">Refresh</button></div>
+            <p style="font-size:13px; color:var(--ink-soft); margin-top:20px;" id="gpAssumeNote"></p>
+            <div class="plist">
+              <div class="plist-meta">Your table plan · change quantities any time</div>
+              <div id="gpItemList"></div>
+              <div class="plist-footer"><button class="btn btn-rind" id="gpAddBtn">Add the plan — <span id="gpTotalPrice">$0.00</span></button></div>
+            </div>
+            <p class="home-note">What you'll need at home: ice, glassware, and citrus if you're mixing. We only add drinks to your cart.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PICK IT YOURSELF -->
+    <div class="tab-panel" id="panel-bench">
+      <div class="flow-grid">
+        <div class="flow-side">
+          <div class="fnum">04</div>
+          <h3>The whole bench</h3>
+          <p>Every bottle, can, and mixer we have in stock right now, laid out for browsing.</p>
+        </div>
+        <div>
+          <div class="bench-filter" id="benchFilter"></div>
+          <div class="bench-strip" id="benchGrid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CURATED BOXES -->
+<section class="curated" id="boxes">
+  <div class="wrap">
+    <div class="section-eyebrow reveal" style="font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em;">Prefer a confident answer?</div>
+    <h2 class="reveal" style="font-size:clamp(28px,3.4vw,44px); margin-top:10px;">Boxes packed by the editors</h2>
+
+    <div class="curated-grid">
+      <div class="featured-box reveal">
+        <div class="featured-tag">Editors' pick — full menu</div>
+        <h3>Dinner Party Table</h3>
+        <p>A sparkling opener, a crisp riesling, a dry rosé for the in-between courses, and a Napa red to close. Every seat gets a proper pour.</p>
+        <ul class="featured-items">
+          <li><span>Wander + Found Sparkling Cuvée Blanc</span><span>$21.99</span></li>
+          <li><span>Giesen Riesling</span><span>$16.99</span></li>
+          <li><span>Luminara Napa Red Blend</span><span>$23.99</span></li>
+        </ul>
+        <button class="btn btn-outline on-dark" onclick="curatedPack('Dinner Party Table', 79.96)">Pack this box — $79.96</button>
+      </div>
+      <div class="box-list reveal">
+        <div class="box-list-row"><div><div class="btitle">The Weekly Box: Porch Season</div><div class="btag">Weekend outdoors</div></div><div class="bprice">$72.96</div></div>
+        <div class="box-list-row"><div><div class="btitle">First Pours</div><div class="btag">First order</div></div><div class="bprice">$58.72</div></div>
+        <div class="box-list-row"><div><div class="btitle">Wine Atlas</div><div class="btag">Wine curious</div></div><div class="bprice">$85.96</div></div>
+        <div class="box-list-row"><div><div class="btitle">Home Bar Starter</div><div class="btag">Bar starter</div></div><div class="bprice">$81.96</div></div>
+        <div class="box-list-row"><div><div class="btitle">Craft Beer Flight</div><div class="btag">Craft beer fan</div></div><div class="bprice">$58.96</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF -->
+<section class="proof">
+  <div class="wrap reveal">
+    <p class="proof-quote">"I had to keep checking the bottle — I couldn't believe it was <em>alcohol free</em>."</p>
+    <div class="proof-attr">Laura Z. — Verified buyer</div>
+    <div class="proof-stats">
+      <div class="proof-stat"><div class="snum">200+</div><div class="slabel">Premium NA labels</div></div>
+      <div class="proof-stat"><div class="snum">#1</div><div class="slabel">Alcohol-free retailer, AFTER Magazine 24–25</div></div>
+      <div class="proof-stat"><div class="snum">0.5%</div><div class="slabel">Max ABV across the entire catalog</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- STORY -->
+<section class="story">
+  <div class="wrap story-grid">
+    <div class="reveal">
+      <div class="kicker">Our story</div>
+      <h2>We make skipping alcohol feel like an upgrade.</h2>
+      <p>Better Rhodes is the premier marketplace for confident and mindful drinking. We started because skipping alcohol shouldn't feel like a downgrade.</p>
+      <p>We aren't against a great alcoholic drink — we just believe skipping the booze shouldn't mean missing out on the fun.</p>
+      <a href="#" class="text-link" style="color:#fff;">Read our story →</a>
+    </div>
+    <div class="reveal" style="border-left:1.5px solid rgba(255,255,255,.2); padding-left:40px;">
+      <svg viewBox="0 0 300 340" width="100%" style="max-width:300px;">
+        <path fill="#ED6A21" opacity=".9" d="M150,20 C210,20 250,70 250,140 C250,220 200,300 150,320 C100,300 50,220 50,140 C50,70 90,20 150,20 Z"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="wrap" style="max-width:760px;">
+    <div class="reveal" style="margin-bottom:8px;"><span style="font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--rind-deep);">Good to know</span></div>
+    <h2 class="reveal" style="font-size:clamp(26px,3vw,36px); margin-bottom:28px;">Honest answers, pinned up</h2>
+    <div class="reveal">
+      <details class="faq-row" open><summary>Is a "box" a fixed bundle?<span></span></summary><p>No. Everything here adds real individual products to your cart: swap, remove, or change quantities any time before checkout.</p></details>
+      <details class="faq-row"><summary>What if something sells out?</summary><p>Availability is checked when you add it. If a product just sold through, we'll tell you exactly what was added and what wasn't.</p></details>
+      <details class="faq-row"><summary>Do recipes need special equipment?</summary><p>No. Everything works with ordinary kitchen kit, and each recipe lists the few grocery items it needs beyond what we ship.</p></details>
+      <details class="faq-row"><summary>Not sure where to start?</summary><p>Email the Better Rhodes team — real recommendations within one business day. <a href="#" class="text-link">Ask the team →</a></p></details>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <div class="wrap reveal">
+    <h2>Pour<br>something<br>better.</h2>
+    <p>10% off is automatic the moment your box has two or more products. No code needed.</p>
+    <a href="#builder" class="btn btn-outline on-dark">Start building</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-grid">
+    <div><div class="brand" style="margin-bottom:14px;">Better <span>Rhodes</span></div><p style="color:var(--ink-soft); font-size:13px; max-width:260px; line-height:1.6;">The premier marketplace for confident and mindful drinking. We don't offer products over 0.5% ABV.</p></div>
+    <div><h5>For You</h5><a>Blogs + Recipes</a><a>Affiliate Program</a><a>Loyalty Rewards</a></div>
+    <div><h5>About</h5><a>Our Story</a><a>Team</a><a>Media & PR</a></div>
+    <div><h5>Help</h5><a>Contact Us</a><a>FAQ</a><a>Shipping</a></div>
+    <div><h5>Get in Touch</h5><a>Email</a><a>Instagram</a><a>TikTok</a></div>
+  </div>
+  <div class="copyright">© 2026 Better Rhodes</div>
+</footer>
+
+<!-- CART DRAWER -->
+<div class="cart-tab" onclick="cartOpen()"><span>Your box</span><span class="badge" id="cartBadge">0</span></div>
+<div class="cart-overlay" id="cartOverlay" onclick="cartClose()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-head"><h3>Your box</h3><button class="cart-close" onclick="cartClose()">✕</button></div>
+  <div class="cart-body" id="cartBody"></div>
+  <div class="cart-foot">
+    <div class="cart-subtotal"><span>Subtotal</span><span id="cartSubtotal">$0.00</span></div>
+    <div class="cart-btn-row"><button class="btn btn-outline on-light btn-sm">Review</button><button class="btn btn-fill btn-sm">Checkout</button></div>
+    <div class="cart-foot-note">Your box uses individual products, so you can change any bottle.</div>
+  </div>
+</div>
+
+<!-- ASK BETTY -->
+<div class="betty-bubble" onclick="bettyToggle()">
+  <div class="betty-avatar">B</div>
+  <div><div class="bt">Ask Betty</div><div class="bs">build your bundle · beta</div></div>
+</div>
+<div class="betty-panel" id="bettyPanel">
+  <div class="betty-panel-head"><div class="betty-avatar" style="width:26px;height:26px;font-size:11px;">B</div><div class="bt" style="font-size:12.5px;">Betty</div></div>
+  <div class="betty-panel-body">Betty reads the live catalog, so new products show up on their own. She only quotes what a product page really says.</div>
+  <div class="betty-reply" id="bettyReply"></div>
+  <div class="betty-input-row"><input id="bettyInput" placeholder="Ask about a bottle…" onkeydown="if(event.key==='Enter') bettyAsk()"><button onclick="bettyAsk()">→</button></div>
+</div>
+
+<script>
+/* ============ NAV BEHAVIOR ============ */
+window.addEventListener('scroll', ()=>{ document.getElementById('siteHeader').classList.toggle('scrolled', window.scrollY>40); });
+function mobileMenuOpen(){ document.getElementById('mobileMenu').classList.add('open'); }
+function mobileMenuClose(){ document.getElementById('mobileMenu').classList.remove('open'); }
+
+/* ============ TABS ============ */
+function switchTab(name){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active', p.id==='panel-'+name));
+  document.getElementById('builder').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+/* ============ ICONS ============ */
+function bIcon(color,type){
+  if(type==='beer') return `<svg viewBox="0 0 24 60" width="22"><rect x="8" y="0" width="8" height="6" rx="1" fill="${color}"/><path d="M6 6 L18 6 L18 56 Q18 60 14 60 L10 60 Q6 60 6 56 Z" fill="${color}"/></svg>`;
+  if(type==='spirit') return `<svg viewBox="0 0 24 60" width="22"><rect x="9" y="0" width="6" height="8" rx="1" fill="${color}"/><rect x="4" y="8" width="16" height="52" rx="4" fill="${color}"/></svg>`;
+  return `<svg viewBox="0 0 24 60" width="22"><rect x="9" y="0" width="6" height="10" rx="1" fill="${color}"/><path d="M8 10 L8 18 L4 24 L4 58 Q4 60 6 60 L18 60 Q20 60 20 58 L20 24 L16 18 L16 10 Z" fill="${color}"/></svg>`;
+}
+const CAT_COLOR={wine:'#8A3B3B', beer:'#C99A3F', spirit:'#8B8F92', rtd:'#5C7A8A'};
+const SWAP_SVG=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1A150E" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>`;
+const TRASH_SVG=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B5402A" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>`;
+
+const POOL = {
+  wine:[
+    {name:'Giesen Chardonnay', price:13.59, familiar:true, desc:'A familiar chardonnay shape, big enough for dinner.'},
+    {name:'Luminara Napa Red Blend', price:19.99, familiar:true, desc:'A structured red with enough grip for the main course.'},
+    {name:'Wander + Found Sparkling Cuvée Blanc', price:21.99, familiar:false, desc:'Opens the evening with fine, dry bubbles.'},
+    {name:'Lautus Rosé', price:21.99, familiar:false, desc:'A dry, Napa-grown rosé with real texture.'},
+  ],
+  beer:[
+    {name:'Heineken 0.0 Lager', price:12.99, familiar:true, desc:'The lager shape everyone already knows.'},
+    {name:'Corona NA Mexican Lager 6-pack', price:15.99, familiar:true, desc:'Light, citrusy, built for outdoor pours.'},
+    {name:'Partake Hazy IPA 6-pack', price:14.99, familiar:false, desc:'Juicy and aromatic, a step past the familiar.'},
+    {name:'Athletic Run Wild IPA 6-pack', price:14.99, familiar:false, desc:'A hoppier pour for the curious drinker.'},
+  ],
+  spirit:[
+    {name:'Ritual Zero Proof Aperitif', price:32.99, familiar:true, desc:'An aperitif with real bite for before dinner.'},
+    {name:'All The Bitter Aromatic Bitters', price:26.99, familiar:true, desc:'Award-winning NA bitters, the finishing touch.'},
+    {name:'Damrak Virgin 0.0 Gin', price:29.99, familiar:false, desc:'A polished 0.0 gin for stirring, not just sipping.'},
+    {name:'Fever Tree Indian Tonic 4-pack', price:7.99, familiar:false, desc:'Sharp, dry tonic built to pair, not overpower.'},
+  ],
+  rtd:[
+    {name:'Sir James 101 Gin & Tonic 4-pack', price:23.99, familiar:true, desc:'The classic pour, canned and ready.'},
+    {name:'Busty Lush Grapefruit Paloma 4-pack', price:14.99, familiar:true, desc:'Bright and citrus-forward, no shaker needed.'},
+    {name:'Sir James 101 Ginger Mule 4-pack', price:23.99, familiar:false, desc:'A spicier canned pour for the adventurous.'},
+    {name:'TOST Non-Alcoholic 4-pack', price:15.99, familiar:false, desc:'A sparkling, celebratory can for toasting.'},
+  ],
+};
+
+/* ============ UNIFIED CART ============ */
+let cart={};
+function cartMerge(item, qty){ if(cart[item.name]) cart[item.name].qty+=qty; else cart[item.name]={name:item.name, price:item.price, qty:qty, cat:item.cat}; if(Object.keys(cart).length && cart[item.name].qty<=0) delete cart[item.name]; cartRender(); }
+function cartSetQty(name, qty){ if(qty<=0) delete cart[name]; else cart[name].qty=qty; cartRender(); }
+function cartRemove(name){ delete cart[name]; cartRender(); }
+function cartRender(){
+  const items=Object.values(cart);
+  const count=items.reduce((s,i)=>s+i.qty,0);
+  const total=items.reduce((s,i)=>s+i.price*i.qty,0);
+  document.getElementById('cartBadge').textContent=count;
+  document.getElementById('cartSubtotal').textContent='$'+total.toFixed(2);
+  const body=document.getElementById('cartBody');
+  if(items.length===0){ body.innerHTML='<div class="cart-empty">Your box is empty. Start with a way in above.</div>'; return; }
+  body.innerHTML=items.map(it=>`
+    <div class="prow">
+      <div class="pswatch">${bIcon(CAT_COLOR[it.cat]||'#8B8F92', it.cat)}</div>
+      <div class="pinfo"><div class="pname">${it.name}</div></div>
+      <div class="qty"><button onclick="cartSetQty('${it.name.replace(/'/g,"\\'")}', ${it.qty-1})">−</button><span>${it.qty}</span><button onclick="cartMerge(${JSON.stringify(it).replace(/"/g,'&quot;')},1)">+</button></div>
+      <div class="pprice">$${(it.price*it.qty).toFixed(2)}</div>
+      <button class="picon" onclick="cartRemove('${it.name.replace(/'/g,"\\'")}')">${TRASH_SVG}</button>
+    </div>`).join('');
+}
+function cartOpen(){ document.getElementById('cartDrawer').classList.add('open'); document.getElementById('cartOverlay').classList.add('open'); }
+function cartClose(){ document.getElementById('cartDrawer').classList.remove('open'); document.getElementById('cartOverlay').classList.remove('open'); }
+cartRender();
+
+function renderRows(containerEl, items, opts){
+  containerEl.innerHTML='';
+  items.forEach(item=>{
+    const row=document.createElement('div'); row.className='prow'; row.id=opts.prefix+'row-'+item.id;
+    row.innerHTML=`
+      <div class="pswatch">${bIcon(CAT_COLOR[item.cat]||'#8B8F92', item.cat)}</div>
+      <div class="pinfo"><div class="pname">${item.name}</div><div class="pdesc">${item.desc}</div></div>
+      <div class="qty"><button onclick="${opts.prefix}ChangeQty('${item.id}',-1)">−</button><span id="${opts.prefix}qty-${item.id}">${item.qty}</span><button onclick="${opts.prefix}ChangeQty('${item.id}',1)">+</button></div>
+      <div class="pprice" id="${opts.prefix}price-${item.id}">$${(item.price*item.qty).toFixed(2)}</div>
+      <div class="pactions">
+        ${opts.swap?`<button class="picon" title="Swap" onclick="${opts.prefix}ToggleSwap('${item.id}')">${SWAP_SVG}</button>`:''}
+        <button class="picon" title="Remove" onclick="${opts.prefix}RemoveItem('${item.id}')">${TRASH_SVG}</button>
+      </div>`;
+    containerEl.appendChild(row);
+    if(opts.swap){
+      const panel=document.createElement('div'); panel.className='swapbox'; panel.id=opts.prefix+'swap-'+item.id;
+      const alts=(POOL[item.cat]||[]).filter(p=>p.name!==item.name).slice(0,2);
+      panel.innerHTML=alts.map(a=>`<div class="swap-opt"><span>${a.name} · $${a.price.toFixed(2)}</span><button onclick="${opts.prefix}ConfirmSwap('${item.id}','${a.name.replace(/'/g,"\\'")}')">Use this</button></div>`).join('');
+      containerEl.appendChild(panel);
+    }
+  });
+  opts.onTotal();
+}
+
+/* ============ BUILD MY BOX ============ */
+const BB_MOMENTS=[
+  {id:'dinner', label:'Dinner for two', desc:'Something with structure for the table.'},
+  {id:'hosting', label:'Hosting friends', desc:'Variety that keeps everyone poured.'},
+  {id:'celebration', label:'A celebration', desc:'Bubbles that look the part.'},
+  {id:'afterwork', label:'After-work unwind', desc:'Low-lift, genuinely good.'},
+  {id:'brunch', label:'Brunch', desc:'Bright, morning-friendly pours.'},
+  {id:'outdoor', label:'Outdoor afternoon', desc:'Cold, casual, crowd-proof.'},
+  {id:'gift', label:'A gift', desc:'Bottles that feel considered.'},
+  {id:'firsttime', label:'First time trying NA', desc:'Safe bets that overdeliver.'},
+];
+const BB_SHAPES=[{id:'mix',label:'A mix of everything'},{id:'wine',label:'Wine'},{id:'beer',label:'Beer'},{id:'spirit',label:'Spirits for mixing'},{id:'rtd',label:'Ready to drink'}];
+const BB_ADVENTURE=[{id:'familiar',label:'Familiar favorites'},{id:'balanced',label:'A balanced mix'},{id:'surprise',label:'Surprise me'}];
+let bbState={moment:null, shape:null, adventure:'balanced', items:[], removedStash:{}};
+const bbMomentGrid=document.getElementById('bbMomentGrid');
+BB_MOMENTS.forEach(m=>{
+  const b=document.createElement('button'); b.className='opt-row';
+  b.innerHTML=`<span><span class="otitle">${m.label}</span><br><span class="odesc">${m.desc}</span></span>`;
+  b.onclick=()=>bbSelectMoment(m,b);
+  bbMomentGrid.appendChild(b);
+});
+function bbSelectMoment(m,el){
+  bbState.moment=m;
+  [...bbMomentGrid.children].forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('bbFnum').textContent='02';
+  document.getElementById('bbFtitle').textContent='The shape';
+  document.getElementById('bbFdesc').textContent='What kind of drinks, and how familiar or adventurous.';
+  document.getElementById('bbStage1').style.display='none';
+  document.getElementById('bbStage2').style.display='block';
+}
+const bbShapeChips=document.getElementById('bbShapeChips');
+BB_SHAPES.forEach(s=>{
+  const b=document.createElement('button'); b.className='tab-choice'; b.textContent=s.label;
+  b.onclick=()=>{ bbState.shape=s; [...bbShapeChips.children].forEach(c=>c.classList.remove('sel')); b.classList.add('sel'); document.getElementById('bbContinueBtn').disabled=false; };
+  bbShapeChips.appendChild(b);
+});
+const bbAdvSeg=document.getElementById('bbAdventureSeg');
+BB_ADVENTURE.forEach(a=>{
+  const b=document.createElement('button'); b.className='tab-choice'+(a.id==='balanced'?' sel':''); b.textContent=a.label;
+  b.onclick=()=>{ bbState.adventure=a.id; [...bbAdvSeg.children].forEach(c=>c.classList.remove('sel')); b.classList.add('sel'); };
+  bbAdvSeg.appendChild(b);
+});
+function bbBuildItems(){
+  let picks=[];
+  if(bbState.shape.id==='mix'){
+    ['wine','beer','spirit','rtd'].forEach((c,i)=>{
+      const p=POOL[c]; let choice;
+      if(bbState.adventure==='familiar') choice=p.filter(x=>x.familiar)[0]||p[0];
+      else if(bbState.adventure==='surprise') choice=p.filter(x=>!x.familiar)[0]||p[0];
+      else choice=p[i%2===0?p.findIndex(x=>x.familiar):p.findIndex(x=>!x.familiar)];
+      picks.push({...choice, cat:c});
+    });
+  } else {
+    let ordered=[...POOL[bbState.shape.id]];
+    if(bbState.adventure==='familiar') ordered.sort((a,b)=>b.familiar-a.familiar);
+    if(bbState.adventure==='surprise') ordered.sort((a,b)=>a.familiar-b.familiar);
+    picks=ordered.slice(0,4).map(p=>({...p, cat:bbState.shape.id}));
+  }
+  return picks.map((p,i)=>({...p, id:'bbit'+i, qty:1}));
+}
+function bbRevealResults(){
+  bbState.items=bbBuildItems();
+  document.getElementById('bbFnum').textContent='03';
+  document.getElementById('bbFtitle').textContent='Your box';
+  document.getElementById('bbFdesc').textContent='Matched to "'+bbState.moment.label+'" + '+bbState.shape.label+'.';
+  document.getElementById('bbStage2').style.display='none';
+  document.getElementById('bbStage3').style.display='block';
+  bbState.items.forEach(it=>cartMerge(it, it.qty));
+  bbRenderItems();
+}
+function bbRenderItems(){ renderRows(document.getElementById('bbItemList'), bbState.items, {prefix:'bb', swap:true, onTotal:bbUpdateTotals}); }
+function bbChangeQty(id,d){
+  const it=bbState.items.find(i=>i.id===id); const before=it.qty; it.qty=Math.max(0,it.qty+d);
+  cartMerge(it, it.qty-before);
+  document.getElementById('bbqty-'+id).textContent=it.qty;
+  document.getElementById('bbprice-'+id).textContent='$'+(it.price*it.qty).toFixed(2);
+  bbUpdateTotals();
+}
+function bbToggleSwap(id){ document.querySelectorAll('#bbItemList .swapbox').forEach(p=>{ if(p.id!=='bbswap-'+id) p.classList.remove('open'); }); document.getElementById('bbswap-'+id).classList.toggle('open'); }
+function bbConfirmSwap(id,name){ const it=bbState.items.find(i=>i.id===id); cartRemove(it.name); const np=POOL[it.cat].find(p=>p.name===name); Object.assign(it,np); cartMerge(it, it.qty); bbRenderItems(); }
+function bbRemoveItem(id){
+  const row=document.getElementById('bbrow-'+id); row.classList.add('removed');
+  const idx=bbState.items.findIndex(i=>i.id===id); const [removed]=bbState.items.splice(idx,1);
+  cartRemove(removed.name); bbUpdateTotals();
+  const toast=document.createElement('div'); toast.className='undo-toast';
+  toast.innerHTML=`<span>Removed ${removed.name}</span><button onclick="bbUndoRemove('${id}')">Undo</button>`;
+  row.after(toast); document.getElementById('bbswap-'+id)?.remove();
+  setTimeout(()=>{ row.remove(); toast.remove(); },4000);
+  bbState.removedStash[id]={item:removed, idx};
+}
+function bbUndoRemove(id){ const s=bbState.removedStash[id]; if(!s) return; bbState.items.splice(s.idx,0,s.item); cartMerge(s.item, s.item.qty); delete bbState.removedStash[id]; bbRenderItems(); }
+function bbUpdateTotals(){
+  const unlocked=bbState.items.filter(i=>i.qty>0).length>=2;
+  document.getElementById('bbDmDot').textContent=unlocked?'✓':'2';
+  document.getElementById('bbDmDot').classList.toggle('on', unlocked);
+  document.getElementById('bbDmText').textContent=unlocked?'10% off unlocked at checkout.':`Add ${2-bbState.items.length} more item(s) to unlock 10% off.`;
+}
+
+/* ============ FIND A RECIPE ============ */
+const RF_INGREDIENTS=['lime','lemon','orange','grapefruit','mint','ginger','tonic'];
+const RF_RECIPES=[
+  {id:'damrak-tonic', name:'Damrak & Tonic', time:'3 min', glass:'Highball', yield:'1 drink · 6 oz', needs:['lime'],
+    method:['Fill a highball glass with ice.','Pour in 2 oz (60 ml) Damrak Virgin 0.0.','Top with 4 oz (120 ml) Fever Tree Indian tonic and stir.','Squeeze a lime wedge over the top.'],
+    kitchen:'1 lime + ice', adds:[{name:'Damrak Virgin 0.0 Gin', price:29.99, cat:'spirit'},{name:'Fever Tree Indian Tonic 4-pack', price:7.99, cat:'rtd'}]},
+  {id:'riesling-bitters', name:'Riesling & Bitters Spritz', time:'5 min', glass:'Large wine glass', yield:'6 spritzes · 6 oz each', needs:['orange'],
+    method:['Fill a large wine glass with ice.','Pour in 5 oz (150 ml) Giesen Riesling.','Add 3–4 dashes of aromatic bitters.','Top with a splash of soda and an orange twist.'],
+    kitchen:'1 orange + ice', adds:[{name:'Giesen Riesling', price:16.99, cat:'wine'},{name:'All The Bitter Aromatic Bitters', price:26.99, cat:'spirit'}]},
+  {id:'damrak-mule', name:'Damrak Ginger Mule', time:'5 min', glass:'Copper mug', yield:'1 drink · 6.5 oz', needs:['ginger','lime'],
+    method:['Fill a copper mug with ice.','Pour in 2 oz (60 ml) Damrak Virgin 0.0.','Top with 4 oz (120 ml) ginger beer.','Squeeze half a lime over the top.'],
+    kitchen:'1 lime + fresh ginger + ice', adds:[{name:'Damrak Virgin 0.0 Gin', price:29.99, cat:'spirit'},{name:'Fever Tree Ginger Beer 4-pack', price:8.99, cat:'rtd'}]},
+  {id:'wolffer-spritz', name:'Wölffer Grapefruit Spritz', time:'10 min', glass:'Large wine glass', yield:'6 drinks · 5.5 oz each', needs:['grapefruit'],
+    method:['Fill a large wine glass with ice.','Pour in 4 oz (120 ml) Sparkling Cuvée Blanc.','Top with 2 oz (60 ml) grapefruit soda.','Garnish with a grapefruit wheel.'],
+    kitchen:'1 grapefruit + ice', adds:[{name:'Wander + Found Sparkling Cuvée Blanc', price:21.99, cat:'wine'},{name:'Busty Lush Grapefruit Paloma 4-pack', price:14.99, cat:'rtd'}]},
+];
+let rfSelected=new Set(); let rfScratch=true;
+const rfChipsEl=document.getElementById('rfChips');
+const rfScratchBtn=document.createElement('button');
+rfScratchBtn.className='tab-choice sel'; rfScratchBtn.textContent="Starting from scratch";
+rfScratchBtn.onclick=()=>{ rfScratch=true; rfSelected.clear(); rfRenderChips(); rfRenderList(); };
+rfChipsEl.appendChild(rfScratchBtn);
+RF_INGREDIENTS.forEach(ing=>{
+  const b=document.createElement('button'); b.className='tab-choice'; b.textContent=ing; b.dataset.ing=ing;
+  b.onclick=()=>{ rfScratch=false; if(rfSelected.has(ing)) rfSelected.delete(ing); else rfSelected.add(ing); if(rfSelected.size===0) rfScratch=true; rfRenderChips(); rfRenderList(); };
+  rfChipsEl.appendChild(b);
+});
+function rfRenderChips(){ rfScratchBtn.classList.toggle('sel', rfScratch); [...rfChipsEl.querySelectorAll('[data-ing]')].forEach(b=>b.classList.toggle('sel', rfSelected.has(b.dataset.ing))); }
+function rfMatches(r){ return rfScratch?true:r.needs.every(n=>rfSelected.has(n)); }
+function rfRenderList(){
+  const list=document.getElementById('rfList'); const note=document.getElementById('rfNote');
+  const matched=RF_RECIPES.filter(rfMatches);
+  note.textContent=rfScratch?'Showing every recipe — narrow it down by tapping what\'s in your kitchen.':(matched.length?`${matched.length} recipe${matched.length>1?'s':''} you can make right now.`:'No exact matches — try another ingredient.');
+  list.innerHTML='';
+  matched.forEach(r=>{
+    const addTotal=r.adds.reduce((s,a)=>s+a.price,0);
+    const row=document.createElement('div'); row.className='rf-row'; row.id='rfrow-'+r.id;
+    row.innerHTML=`
+      <div class="rf-head" onclick="rfToggle('${r.id}')">
+        <div><h4>${r.name}</h4><div class="rf-meta-row"><span class="rf-meta">${r.time}</span><span class="rf-meta">${r.glass}</span><span class="rf-meta">${r.yield}</span></div></div>
+        <svg class="rf-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A150E" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="rf-detail"><div class="rf-detail-grid">
+        <div><div class="field-label" style="margin-top:0;">Method</div><ol>${r.method.map(m=>`<li>${m}</li>`).join('')}</ol><div class="rf-kitchen"><b>From your kitchen:</b> ${r.kitchen}</div></div>
+        <div>
+          <div class="plist" style="margin-top:0;">
+            <div class="plist-meta">Better Rhodes adds</div>
+            ${r.adds.map(a=>`<div style="display:flex; justify-content:space-between; padding:9px 4px; border-bottom:1px solid var(--line); font-size:13px;"><span>${a.name}</span><span style="font-weight:700;">$${a.price.toFixed(2)}</span></div>`).join('')}
+            <div class="plist-footer"><button class="btn btn-rind btn-sm" onclick='rfAddToBox("${r.id}")'>Add drinks — $${addTotal.toFixed(2)}</button></div>
+          </div>
+        </div>
+      </div></div>`;
+    list.appendChild(row);
+  });
+}
+function rfToggle(id){ document.querySelectorAll('.rf-row').forEach(r=>{ if(r.id!=='rfrow-'+id) r.classList.remove('open'); }); document.getElementById('rfrow-'+id).classList.toggle('open'); }
+function rfAddToBox(id){
+  const r=RF_RECIPES.find(x=>x.id===id); r.adds.forEach(a=>cartMerge(a,1));
+  const btn=document.querySelector(`#rfrow-${id} .btn-rind`); const orig=btn.textContent;
+  btn.textContent='Added ✓'; setTimeout(()=>{ btn.textContent=orig; },1800);
+}
+rfRenderChips(); rfRenderList();
+
+/* ============ THE WHOLE BENCH ============ */
+const BENCH_CATS=[{id:'all',label:'All'},{id:'wine',label:'Wine'},{id:'beer',label:'Beer'},{id:'spirit',label:'Spirits'},{id:'rtd',label:'Ready to drink'}];
+let benchFilterState='all';
+const benchFilterEl=document.getElementById('benchFilter');
+BENCH_CATS.forEach(c=>{
+  const b=document.createElement('button'); b.className='tab-choice'+(c.id==='all'?' sel':''); b.textContent=c.label;
+  b.onclick=()=>{ benchFilterState=c.id; [...benchFilterEl.children].forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); benchRender(); };
+  benchFilterEl.appendChild(b);
+});
+function benchRender(){
+  const grid=document.getElementById('benchGrid'); grid.innerHTML='';
+  Object.entries(POOL).forEach(([cat,items])=>{
+    if(benchFilterState!=='all' && benchFilterState!==cat) return;
+    items.forEach((it,i)=>{
+      const tile=document.createElement('div'); tile.className='bench-tile';
+      tile.innerHTML=`<div class="bench-swatch">${bIcon(CAT_COLOR[cat], cat)}</div><h5>${it.name}</h5><div class="bench-row"><span class="bench-price">$${it.price.toFixed(2)}</span><button class="bench-add">+</button></div>`;
+      grid.appendChild(tile);
+      tile.querySelector('.bench-add').onclick=(e)=>{
+        cartMerge({...it, cat}, 1);
+        e.target.textContent='✓'; e.target.classList.add('added');
+        setTimeout(()=>{ e.target.textContent='+'; e.target.classList.remove('added'); },1200);
+      };
+    });
+  });
+}
+benchRender();
+
+/* ============ PLAN FOR GUESTS ============ */
+const GP_OCCASIONS=['Hosting friends','A dinner','A celebration','Brunch','Outdoor afternoon'];
+const GP_DURATIONS=[{id:'short',label:'About 2 hours',mult:1},{id:'long',label:'A long evening',mult:1.6}];
+const GP_ALCOHOL=[{id:'no',label:'No, non-alcoholic only'},{id:'yes',label:'Yes, a mixed table'}];
+let gpState={occasion:'Hosting friends', guests:6, duration:'short', alcohol:'no', items:[], generated:false, removedStash:{}};
+const gpOccasionEl=document.getElementById('gpOccasionChips');
+GP_OCCASIONS.forEach(o=>{
+  const b=document.createElement('button'); b.className='tab-choice'+(o===gpState.occasion?' sel':''); b.textContent=o;
+  b.onclick=()=>{ gpState.occasion=o; [...gpOccasionEl.children].forEach(c=>c.classList.remove('sel')); b.classList.add('sel'); gpMarkDirty(); };
+  gpOccasionEl.appendChild(b);
+});
+const gpDurationEl=document.getElementById('gpDurationSeg');
+GP_DURATIONS.forEach(d=>{
+  const b=document.createElement('button'); b.className='tab-choice'+(d.id==='short'?' sel':''); b.textContent=d.label;
+  b.onclick=()=>{ gpState.duration=d.id; [...gpDurationEl.children].forEach(c=>c.classList.remove('sel')); b.classList.add('sel'); gpMarkDirty(); };
+  gpDurationEl.appendChild(b);
+});
+const gpAlcoholEl=document.getElementById('gpAlcoholSeg');
+GP_ALCOHOL.forEach(a=>{
+  const b=document.createElement('button'); b.className='tab-choice'+(a.id==='no'?' sel':''); b.textContent=a.label;
+  b.onclick=()=>{ gpState.alcohol=a.id; [...gpAlcoholEl.children].forEach(c=>c.classList.remove('sel')); b.classList.add('sel'); gpMarkDirty(); };
+  gpAlcoholEl.appendChild(b);
+});
+function gpChangeGuests(d){ gpState.guests=Math.max(2,Math.min(40,gpState.guests+d)); document.getElementById('gpGuestCount').textContent=gpState.guests; gpMarkDirty(); }
+function gpMarkDirty(){ if(gpState.generated) document.getElementById('gpRefreshBanner').classList.add('show'); }
+function gpComputePlan(){
+  const mult=GP_DURATIONS.find(d=>d.id===gpState.duration).mult;
+  const total=gpState.guests*1.5*mult;
+  const arrival=total*0.3, dinner=total*0.4, later=total*0.3;
+  return [
+    {id:'gp0', cat:'wine', name:'Wander + Found Sparkling Cuvée Blanc', price:21.99, qty:Math.max(1,Math.ceil(arrival/5)), desc:'Arrivals: a toast that sets the tone.'},
+    {id:'gp1', cat:'wine', name:'Giesen Chardonnay', price:13.59, qty:Math.max(1,Math.ceil((dinner*0.6)/5)), desc:'With dinner: a familiar table pour.'},
+    {id:'gp2', cat:'rtd', name:'Sir James 101 Gin & Tonic 4-pack', price:23.99, qty:Math.max(1,Math.ceil((dinner*0.4)/4)), desc:'With dinner: ready-to-drink backup.'},
+    {id:'gp3', cat:'beer', name:'Corona NA Mexican Lager 6-pack', price:15.99, qty:Math.max(1,Math.ceil(later/6)), desc:'Later: something cold for the stragglers.'},
+  ];
+}
+function gpSuggestPlan(){
+  gpState.items=gpComputePlan(); gpState.generated=true;
+  document.getElementById('gpResults').style.display='block';
+  document.getElementById('gpRefreshBanner').classList.remove('show');
+  document.getElementById('gpAssumeNote').textContent=`This plan assumes about 1.5 non-alcoholic servings per guest over ${GP_DURATIONS.find(d=>d.id===gpState.duration).label.toLowerCase()}.`;
+  gpRenderItems();
+}
+function gpRenderItems(){ renderRows(document.getElementById('gpItemList'), gpState.items, {prefix:'gp', swap:false, onTotal:gpUpdateTotal}); }
+function gpChangeQty(id,d){ const it=gpState.items.find(i=>i.id===id); it.qty=Math.max(0,it.qty+d); document.getElementById('gpqty-'+id).textContent=it.qty; document.getElementById('gpprice-'+id).textContent='$'+(it.price*it.qty).toFixed(2); gpUpdateTotal(); }
+function gpRemoveItem(id){
+  const row=document.getElementById('gprow-'+id); row.classList.add('removed');
+  const idx=gpState.items.findIndex(i=>i.id===id); const [removed]=gpState.items.splice(idx,1); gpUpdateTotal();
+  const toast=document.createElement('div'); toast.className='undo-toast';
+  toast.innerHTML=`<span>Removed ${removed.name}</span><button onclick="gpUndoRemove('${id}')">Undo</button>`;
+  row.after(toast); setTimeout(()=>{ row.remove(); toast.remove(); },4000);
+  gpState.removedStash[id]={item:removed, idx};
+}
+function gpUndoRemove(id){ const s=gpState.removedStash[id]; if(!s) return; gpState.items.splice(s.idx,0,s.item); delete gpState.removedStash[id]; gpRenderItems(); }
+function gpUpdateTotal(){ const total=gpState.items.reduce((s,i)=>s+i.price*i.qty,0); document.getElementById('gpTotalPrice').textContent='$'+total.toFixed(2); }
+document.getElementById('gpAddBtn').addEventListener('click', ()=>{
+  gpState.items.filter(i=>i.qty>0).forEach(it=>cartMerge(it, it.qty));
+  const btn=document.getElementById('gpAddBtn'); const orig=btn.innerHTML;
+  btn.textContent='Added to your box ✓';
+  setTimeout(()=>{ btn.innerHTML=orig; },1800);
+});
+
+/* ============ CURATED BOX PACK ============ */
+function curatedPack(name, price){
+  cartMerge({name:name+' (bundle)', price:price, cat:'wine'}, 1);
+  cartOpen();
+}
+document.querySelectorAll('.box-list-row').forEach(row=>{
+  row.style.cursor='pointer';
+  row.addEventListener('click', ()=>{
+    const name=row.querySelector('.btitle').textContent;
+    const price=parseFloat(row.querySelector('.bprice').textContent.replace('$',''));
+    curatedPack(name, price);
+  });
+});
+
+/* ============ ASK BETTY ============ */
+function bettyToggle(){ document.getElementById('bettyPanel').classList.toggle('open'); }
+function bettyAsk(){
+  const input=document.getElementById('bettyInput'); const reply=document.getElementById('bettyReply');
+  if(!input.value.trim()) return;
+  reply.textContent='Betty is a live-catalog assistant in the real product — this preview shows the interface only.';
+  reply.classList.add('show'); input.value='';
+}
+
+/* ============ SCROLL REVEAL ============ */
+const observer=new IntersectionObserver((entries)=>{ entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); observer.unobserve(e.target); } }); },{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>
